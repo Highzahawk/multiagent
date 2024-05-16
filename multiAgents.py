@@ -328,10 +328,64 @@ def betterEvaluationFunction(currentGameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: We use a linear combination of several features to evaluate
+    the game state. These features include:
+    - Distance to the nearest food (closer is better)
+    - Distance to the nearest ghost (farther is better)
+    - Number of remaining food pellets (fewer is better)
+    - Scared time of ghosts (higher is better)
+    - Distance to the nearest power pellet (closer is better)
+    - Current game score (higher is better)
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Useful information from the current game state
+    pacmanPos = currentGameState.getPacmanPosition()
+    food = currentGameState.getFood()
+    ghostStates = currentGameState.getGhostStates()
+    capsules = currentGameState.getCapsules()
+    currentScore = currentGameState.getScore()
+
+    # Distance to the nearest food
+    foodList = food.asList()
+    if foodList:
+        minFoodDist = min(manhattanDistance(pacmanPos, food) for food in foodList)
+    else:
+        minFoodDist = 0
+
+    # Distance to the nearest ghost
+    ghostDistances = [manhattanDistance(pacmanPos, ghost.getPosition()) for ghost in ghostStates]
+    minGhostDist = min(ghostDistances) if ghostDistances else float('inf')
+
+    # Number of remaining food pellets
+    numFood = len(foodList)
+
+    # Scared time of ghosts
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+    maxScaredTime = max(scaredTimes) if scaredTimes else 0
+
+    # Distance to the nearest power pellet
+    if capsules:
+        minCapsuleDist = min(manhattanDistance(pacmanPos, capsule) for capsule in capsules)
+    else:
+        minCapsuleDist = 0
+
+    # Weights for the features
+    weightFoodDist = -2.0
+    weightGhostDist = 2.0 if minGhostDist > 0 else -10.0  # penalize being too close to ghosts
+    weightNumFood = -100.0
+    weightScaredTime = 20.0
+    weightCapsuleDist = -1.5
+    weightScore = 1.0
+
+    # Linear combination of the features
+    evaluation = (weightFoodDist / (minFoodDist + 1) +
+                  weightGhostDist / (minGhostDist + 1) +
+                  weightNumFood * numFood +
+                  weightScaredTime * maxScaredTime +
+                  weightCapsuleDist / (minCapsuleDist + 1) +
+                  weightScore * currentScore)
+
+    return evaluation
+
 
 # Abbreviation
 better = betterEvaluationFunction
