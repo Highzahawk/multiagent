@@ -144,23 +144,59 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Here are some method calls that might be useful when implementing minimax.
 
         gameState.getLegalActions(agentIndex):
-        Returns a list of legal actions for an agent
-        agentIndex=0 means Pacman, ghosts are >= 1
+            Returns a list of legal actions for an agent
+            agentIndex=0 means Pacman, ghosts are >= 1
 
         gameState.generateSuccessor(agentIndex, action):
-        Returns the successor game state after an agent takes an action
+            Returns the successor game state after an agent takes an action
 
         gameState.getNumAgents():
-        Returns the total number of agents in the game
-
-        gameState.isWin():
-        Returns whether or not the game state is a winning state
-
-        gameState.isLose():
-        Returns whether or not the game state is a losing state
+            Returns the total number of agents in the game
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        def minimax(agentIndex, depth, gameState):
+            if gameState.isWin() or gameState.isLose() or depth == self.depth:
+                return self.evaluationFunction(gameState)
+            
+            if agentIndex == 0:  # Pacman's turn (Maximizer)
+                return max_value(agentIndex, depth, gameState)
+            else:  # Ghosts' turn (Minimizer)
+                return min_value(agentIndex, depth, gameState)
+
+        def max_value(agentIndex, depth, gameState):
+            v = float('-inf')
+            legalActions = gameState.getLegalActions(agentIndex)
+            if not legalActions:
+                return self.evaluationFunction(gameState)
+
+            for action in legalActions:
+                successor = gameState.generateSuccessor(agentIndex, action)
+                v = max(v, minimax(1, depth, successor))
+            return v
+
+        def min_value(agentIndex, depth, gameState):
+            v = float('inf')
+            legalActions = gameState.getLegalActions(agentIndex)
+            if not legalActions:
+                return self.evaluationFunction(gameState)
+
+            nextAgent = agentIndex + 1
+            if nextAgent == gameState.getNumAgents():
+                nextAgent = 0
+                depth += 1
+
+            for action in legalActions:
+                successor = gameState.generateSuccessor(agentIndex, action)
+                v = min(v, minimax(nextAgent, depth, successor))
+            return v
+
+        # Initial call from Pacman's perspective
+        legalActions = gameState.getLegalActions(0)
+        scores = [(action, minimax(1, 0, gameState.generateSuccessor(0, action))) for action in legalActions]
+        bestAction = max(scores, key=lambda x: x[1])[0]
+
+        return bestAction
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
