@@ -40,15 +40,13 @@ class ReflexAgent(Agent):
         """
         # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions()
-
+        
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-
-        "Add more of your code here if you want to"
-
+        
         return legalMoves[chosenIndex]
 
     def evaluationFunction(self, currentGameState, action):
@@ -69,12 +67,37 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
+        oldFood = currentGameState.getFood()
         newFood = successorGameState.getFood()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        # Heuristic components
+        foodList = newFood.asList()
+        ghostPositions = [ghostState.getPosition() for ghostState in newGhostStates]
+        score = successorGameState.getScore()
+        
+        # Closest food distance
+        if foodList:
+            closestFoodDist = min(manhattanDistance(newPos, food) for food in foodList)
+        else:
+            closestFoodDist = 0
+
+        # Closest ghost distance
+        ghostDistances = [manhattanDistance(newPos, ghostPos) for ghostPos in ghostPositions]
+        if ghostDistances:
+            closestGhostDist = min(ghostDistances)
+        else:
+            closestGhostDist = float('inf')
+        
+        # Avoid ghosts
+        ghostPenalty = -200 if closestGhostDist <= 1 else 0
+        
+        # Encourage eating food
+        foodReward = -2 * closestFoodDist
+        
+        # Combine factors
+        return score + foodReward + ghostPenalty
 
 def scoreEvaluationFunction(currentGameState):
     """
