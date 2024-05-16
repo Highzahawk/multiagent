@@ -254,11 +254,18 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         alpha = float('-inf')
         beta = float('inf')
         legalActions = gameState.getLegalActions(0)
-        scores = [(action, alphabeta(1, 0, gameState.generateSuccessor(0, action), alpha, beta)) for action in legalActions]
-        bestAction = max(scores, key=lambda x: x[1])[0]
+        bestAction = None
+        v = float('-inf')
 
+        for action in legalActions:
+            successor = gameState.generateSuccessor(0, action)
+            new_v = alphabeta(1, 0, successor, alpha, beta)
+            if new_v > v:
+                v = new_v
+                bestAction = action
+            alpha = max(alpha, v)
+        
         return bestAction
-
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
