@@ -57,7 +57,6 @@ class ReflexAgent(Agent):
 
         The evaluation function takes in the current and proposed successor
         GameStates (pacman.py) and returns a number, where higher numbers are better.
-        h
 
         The code below extracts some useful information from the state, like the
         remaining food (newFood) and Pacman position after moving (newPos).
