@@ -344,16 +344,13 @@ def betterEvaluationFunction(currentGameState):
     # Distance to the nearest food
     foodList = food.asList()
     if foodList:
-        minFoodDist = min([manhattanDistance(pacmanPos, food) for food in foodList])
+        minFoodDist = min(manhattanDistance(pacmanPos, food) for food in foodList)
     else:
         minFoodDist = 0
 
     # Distance to the nearest ghost
     ghostDistances = [manhattanDistance(pacmanPos, ghost.getPosition()) for ghost in ghostStates]
-    if ghostDistances:
-        minGhostDist = min(ghostDistances)
-    else:
-        minGhostDist = float('inf')
+    minGhostDist = min(ghostDistances) if ghostDistances else float('inf')
 
     # Number of remaining food pellets
     numFood = len(foodList)
@@ -362,11 +359,18 @@ def betterEvaluationFunction(currentGameState):
     scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
     maxScaredTime = max(scaredTimes) if scaredTimes else 0
 
+    # Distance to the nearest power pellet
+    if capsules:
+        minCapsuleDist = min(manhattanDistance(pacmanPos, capsule) for capsule in capsules)
+    else:
+        minCapsuleDist = float('inf')
+
     # Weights for the features
-    weightFoodDist = -1.0
-    weightGhostDist = 2.0 if minGhostDist > 0 else -10.0  # penalize being too close to ghosts
-    weightNumFood = -10.0
+    weightFoodDist = -2.0
+    weightGhostDist = 2.0 if minGhostDist > 1 else -10.0  # penalize being too close to ghosts
+    weightNumFood = -100.0
     weightScaredTime = 2.0
+    weightCapsuleDist = -1.5
     weightScore = 1.0
 
     # Linear combination of the features
@@ -374,9 +378,11 @@ def betterEvaluationFunction(currentGameState):
                   weightGhostDist / (minGhostDist + 1) +
                   weightNumFood * numFood +
                   weightScaredTime * maxScaredTime +
+                  weightCapsuleDist / (minCapsuleDist + 1) +
                   weightScore * currentScore)
 
     return evaluation
+
 
 
 # Abbreviation
