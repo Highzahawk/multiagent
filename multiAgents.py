@@ -344,13 +344,6 @@ def betterEvaluationFunction(currentGameState):
     capsules = currentGameState.getCapsules()
     currentScore = currentGameState.getScore()
 
-    # Debugging statements
-    print(f"Pacman Position: {pacmanPos}")
-    print(f"Food: {food}")
-    print(f"Ghost States: {ghostStates}")
-    print(f"Capsules: {capsules}")
-    print(f"Current Score: {currentScore}")
-
     # Distance to the nearest food
     foodList = food.asList()
     if foodList:
@@ -391,10 +384,8 @@ def betterEvaluationFunction(currentGameState):
                   weightCapsuleDist / (minCapsuleDist + 1) +
                   weightScore * currentScore)
 
-    # Debugging statement
-    print(f"Evaluation: {evaluation}")
-
     return evaluation
+
 
 
 
