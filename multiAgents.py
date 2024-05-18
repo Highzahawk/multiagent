@@ -327,10 +327,45 @@ def betterEvaluationFunction(currentGameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: This evaluation function calculates the score based on the current game state.
+    It considers the distance to the nearest food, the distance to the nearest ghost, and the number
+    of remaining food pellets. The score is adjusted to prioritize getting closer to food while avoiding
+    ghosts, and to incentivize clearing the board quickly.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Useful information you can extract from a GameState (pacman.py)
+    pacmanPosition = currentGameState.getPacmanPosition()
+    food = currentGameState.getFood()
+    ghostStates = currentGameState.getGhostStates()
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+    
+    # Score from the current game state
+    score = currentGameState.getScore()
+    
+    # Distance to the nearest food
+    foodList = food.asList()
+    if foodList:
+        minFoodDistance = min([util.manhattanDistance(pacmanPosition, food) for food in foodList])
+    else:
+        minFoodDistance = 0
+    
+    # Distance to the nearest ghost
+    ghostDistances = [util.manhattanDistance(pacmanPosition, ghost.getPosition()) for ghost in ghostStates]
+    minGhostDistance = min(ghostDistances) if ghostDistances else float('inf')
+    
+    # Adjust score based on food and ghost distances
+    if minGhostDistance > 0:
+        score += 1.0 / minGhostDistance
+    
+    score -= 1.5 * minFoodDistance
+    
+    # Additional consideration for the number of remaining food pellets
+    score -= 4 * len(foodList)
+    
+    return score
+
+# Abbreviation
+better = betterEvaluationFunction
+
 
 
 
