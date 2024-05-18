@@ -328,15 +328,16 @@ def betterEvaluationFunction(currentGameState):
     evaluation function (question 5).
 
     DESCRIPTION: This evaluation function calculates the score based on the current game state.
-    It considers the distance to the nearest food, the distance to the nearest ghost, and the number
-    of remaining food pellets. The score is adjusted to prioritize getting closer to food while avoiding
-    ghosts, and to incentivize clearing the board quickly.
+    It considers the distance to the nearest food, the distance to the nearest ghost, the number
+    of remaining food pellets, and the proximity to power pellets. The score is adjusted to prioritize
+    getting closer to food while avoiding ghosts, and to incentivize clearing the board quickly.
     """
     # Useful information you can extract from a GameState (pacman.py)
     pacmanPosition = currentGameState.getPacmanPosition()
     food = currentGameState.getFood()
     ghostStates = currentGameState.getGhostStates()
     scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+    capsules = currentGameState.getCapsules()
     
     # Score from the current game state
     score = currentGameState.getScore()
@@ -352,6 +353,12 @@ def betterEvaluationFunction(currentGameState):
     ghostDistances = [util.manhattanDistance(pacmanPosition, ghost.getPosition()) for ghost in ghostStates]
     minGhostDistance = min(ghostDistances) if ghostDistances else float('inf')
     
+    # Distance to the nearest capsule
+    if capsules:
+        minCapsuleDistance = min([util.manhattanDistance(pacmanPosition, capsule) for capsule in capsules])
+    else:
+        minCapsuleDistance = float('inf')
+    
     # Adjust score based on food and ghost distances
     if minGhostDistance > 0:
         score += 1.0 / minGhostDistance
@@ -361,13 +368,17 @@ def betterEvaluationFunction(currentGameState):
     # Additional consideration for the number of remaining food pellets
     score -= 4 * len(foodList)
     
+    # Additional consideration for proximity to capsules
+    if minCapsuleDistance < float('inf'):
+        score += 1.5 / minCapsuleDistance
+    
+    # Additional consideration for scared ghosts
+    score += sum(scaredTimes)
+    
     return score
 
 # Abbreviation
 better = betterEvaluationFunction
-
-
-
 
 
 # Abbreviation
